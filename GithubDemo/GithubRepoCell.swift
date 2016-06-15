@@ -29,20 +29,20 @@ class GithubRepoCell: UITableViewCell {
     }
     
     func setContentWithRepo(repo: GithubRepo) {
-//        nameLabel.text = repo.name
-//        ownerLabel.text = repo.ownerHandle
-//        if let stars = repo.stars {
-//            starsLabel.text = String(stars)
-//        }
-//        
-//        if let forks = repo.forks {
-//            forksLabel.text = String(forks)
-//        }
-//        
-//        if let urlString = repo.ownerAvatarURL {
-//            let ownerAvatarURL = NSURL(string: urlString)!
-//            ownerAvatarImage.setImageWithURL(ownerAvatarURL)
-//        }
-//        descriptionLabel.text = repo.description
+        nameLabel.text = repo.name
+        ownerLabel.text = repo.ownerHandle
+        if let stars = repo.stars {
+            starsLabel.text = String(stars)
+        }
+        
+        if let forks = repo.forks {
+            forksLabel.text = String(forks)
+        }
+        
+        if let urlString = repo.ownerAvatarURL {
+            let ownerAvatarURL = NSURL(string: urlString)!
+            ownerAvatarImage.setImageWithURL(ownerAvatarURL)
+        }
+        descriptionLabel.text = repo.desc
     }
 }
