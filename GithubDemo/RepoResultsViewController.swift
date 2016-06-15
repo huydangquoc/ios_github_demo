@@ -14,9 +14,9 @@ class RepoResultsViewController: UIViewController {
 
     
     @IBOutlet weak var tableView: UITableView!
+    
     var searchBar: UISearchBar!
     var searchSettings = GithubRepoSearchSettings()
-
     var repos: [GithubRepo] = []
 
     override func viewDidLoad() {
@@ -59,6 +59,27 @@ class RepoResultsViewController: UIViewController {
             }, error: { (error) -> Void in
                 print(error)
         })
+    }
+    
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+        
+        if segue.identifier == "settingsSegue" {
+            // we wrapped our SearchSettingsViewController inside a UINavigationController
+            let navController = segue.destinationViewController as! UINavigationController
+            let settingsVC = navController.topViewController as! SearchSettingsViewController
+            settingsVC.settings = self.searchSettings
+        }
+    }
+    
+    @IBAction func didSaveSettings(segue: UIStoryboardSegue) {
+        
+        let settingsVC = segue.sourceViewController as! SearchSettingsViewController
+        searchSettings = settingsVC.settings
+        doSearch()
+    }
+    
+    @IBAction func didCancelSettingChanges(segue: UIStoryboardSegue) {
+        
     }
 }
 

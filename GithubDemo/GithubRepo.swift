@@ -88,8 +88,16 @@ class GithubRepo: CustomStringConvertible {
             q = q + searchString;
         }
         q = q + " stars:>\(settings.minStars)";
-        params["q"] = q;
         
+        if settings.shouldFilterLanguages {
+            for (index, language) in settings.languages.enumerate() {
+                if settings.includeLanguage[index] {
+                    q = q + " language:\"\(language)\""
+                }
+            }
+        }
+        
+        params["q"] = q;
         params["sort"] = "stars";
         params["order"] = "desc";
         
