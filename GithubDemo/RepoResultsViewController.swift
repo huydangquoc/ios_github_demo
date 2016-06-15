@@ -12,14 +12,21 @@ import MBProgressHUD
 // Main ViewController
 class RepoResultsViewController: UIViewController {
 
+    
+    @IBOutlet weak var tableView: UITableView!
     var searchBar: UISearchBar!
     var searchSettings = GithubRepoSearchSettings()
 
-    var repos: [GithubRepo]!
+    var repos: [GithubRepo] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        tableView.dataSource = self
+        tableView.delegate = self
+        tableView.estimatedRowHeight = 150
+        tableView.rowHeight = UITableViewAutomaticDimension
+        
         // Initialize the UISearchBar
         searchBar = UISearchBar()
         searchBar.delegate = self
@@ -40,10 +47,13 @@ class RepoResultsViewController: UIViewController {
         // Perform request to GitHub API to get the list of repositories
         GithubRepo.fetchRepos(searchSettings, successCallback: { (newRepos) -> Void in
 
-            // Print the returned repositories to the output window
-            for repo in newRepos {
-                print(repo)
-            }   
+//            // Print the returned repositories to the output window
+//            for repo in newRepos {
+//                print(repo)
+//            }
+            
+            self.repos = newRepos
+            self.tableView.reloadData()
 
             MBProgressHUD.hideHUDForView(self.view, animated: true)
             }, error: { (error) -> Void in
@@ -74,5 +84,29 @@ extension RepoResultsViewController: UISearchBarDelegate {
         searchSettings.searchString = searchBar.text
         searchBar.resignFirstResponder()
         doSearch()
+    }
+}
+
+// Table methods
+extension RepoResultsViewController: UITableViewDataSource, UITableViewDelegate {
+    
+    // Tells the delegate that the specified row is now selected.
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        searchBar.resignFirstResponder()
+    }
+    
+    // Tells the data source to return the number of rows in a given section of a table view.
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return repos.count
+    }
+    
+    // Asks the data source for a cell to insert in a particular location of the table view.
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        
+        let cell = tableView.dequeueReusableCellWithIdentifier("GithubRepoCell") as! GithubRepoCell
+        cell.setContentWithRepo(repos[indexPath.row])
+        return cell
     }
 }
