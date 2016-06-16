@@ -38,6 +38,7 @@ class SearchSettingsViewController: UIViewController {
 
         // Do any additional setup after loading the view.
         tableView.dataSource = self
+        tableView.delegate = self
     }
 
     override func didReceiveMemoryWarning() {
@@ -124,6 +125,34 @@ extension SearchSettingsViewController: UITableViewDataSource {
         
         return tableView.dequeueReusableCellWithIdentifier(CellIdentifier.CheckMarkCell) as! CheckMarkCell
     }
+}
+
+extension SearchSettingsViewController: UITableViewDelegate {
+    
+    // Asks the delegate for the height to use for the header of a particular section.
+    func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+        
+        var headerHeight: CGFloat
+        
+        switch PrefSection(rawValue: section)! {
+        case .FilterByLanguage:
+            headerHeight = 50
+        default:
+            headerHeight = 0
+        }
+        
+        return headerHeight
+    }
+    
+    // Asks the delegate for a view object to display in the header of the specified section of the table view.
+//    func tableView(tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
+//    
+//        let frame = tableView.frame
+//        let headerView = UIView(frame: CGRect(x: 0, y: 0, width: frame.width, height: 50))
+//        headerView.backgroundColor = UIColor.clearColor()
+//    
+//        return headerView
+//    }
 }
 
 extension SearchSettingsViewController: ValueSliderCellDelegate {
