@@ -90,7 +90,7 @@ class GithubRepo: CustomStringConvertible {
         q = q + " stars:>\(settings.minStars)";
         
         if settings.shouldFilterLanguages {
-            for (index, language) in settings.languages.enumerate() {
+            for (index, language) in languages.enumerate() {
                 if settings.includeLanguage[index] {
                     q = q + " language:\"\(language)\""
                 }

@@ -8,12 +8,31 @@
 
 import UIKit
 
+struct PrefRowIdentifier {
+    static let MininumStars = "Mininum Stars"
+    static let FilterByLanguage = "Filter by Language"
+    static let Language = "language:"
+}
+
+struct CellIdentifier {
+    static let ValueSliderCell = "ValueSliderCell"
+    static let SwitchCell = "SwitchCell"
+    static let CheckMarkCell = "CheckMarkCell"
+}
+
+enum PrefSection : Int {
+    case MininumStars = 0
+    case FilterByLanguage
+}
+
 class SearchSettingsViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
     
     var settings: GithubRepoSearchSettings!
-    
+    let tableStructure: [[String]] = [[PrefRowIdentifier.MininumStars],
+                                      [PrefRowIdentifier.FilterByLanguage, PrefRowIdentifier.Language]]
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -26,7 +45,6 @@ class SearchSettingsViewController: UIViewController {
         // Dispose of any resources that can be recreated.
     }
     
-
     /*
     // MARK: - Navigation
 
@@ -44,17 +62,17 @@ extension SearchSettingsViewController: UITableViewDataSource {
     // Asks the data source to return the number of sections in the table view.
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
         
-        return 2
+        return self.tableStructure.count
     }
     
     // Tells the data source to return the number of rows in a given section of a table view.
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        if section == 0 {
+        if section == PrefSection.MininumStars.rawValue {
             return 1
-        } else if section == 1 {
+        } else if section == PrefSection.FilterByLanguage.rawValue {
             if settings.shouldFilterLanguages {
-                return 1 + settings.languages.count
+                return 1 + languages.count
             }
             return 1
         }
@@ -65,33 +83,46 @@ extension SearchSettingsViewController: UITableViewDataSource {
     // Asks the data source for a cell to insert in a particular location of the table view.
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        if indexPath.section == 0 {
-            let minStarsCell = tableView.dequeueReusableCellWithIdentifier("ValueSliderCell") as! ValueSliderCell
-            minStarsCell.configure("Mininum Stars", valueMinimum: 0, valueMaximum: 5000)
-            minStarsCell.slider.value = Float(settings.minStars)
-            minStarsCell.valueLabel.text = String(settings.minStars)
-            minStarsCell.valueIdentifer = "Mininum Stars"
-            minStarsCell.delegate = self
-            return minStarsCell
-        } else if indexPath.section == 1 {
-            if indexPath.row == 0 {
-                let filterLanguagesCell = tableView.dequeueReusableCellWithIdentifier("SwitchCell") as! SwitchCell
-                filterLanguagesCell.descriptionLabel.text = "Filter by Language"
-                filterLanguagesCell.switchIdentifier = "Filter by Language"
-                filterLanguagesCell.onOffSwitch.on = settings.shouldFilterLanguages
-                filterLanguagesCell.delegate = self
-                return filterLanguagesCell
-            } else if indexPath.row <= settings.languages.count {
-                let languageCell = tableView.dequeueReusableCellWithIdentifier("CheckMarkCell") as! CheckMarkCell
-                languageCell.descriptionLabel.text = settings.languages[indexPath.row - 1]
-                languageCell.switchIdentifier = "language:" + settings.languages[indexPath.row - 1]
-                languageCell.isChecked = settings.includeLanguage[indexPath.row - 1]
-                languageCell.delegate = self
-                return languageCell
-            }
+        if indexPath.section == PrefSection.MininumStars.rawValue {
+            return cellForMininumStars(tableView, cellForRowAtIndexPath: indexPath)
+            
+        } else if indexPath.section == PrefSection.FilterByLanguage.rawValue {
+            return cellForFilterByLanguage(tableView, cellForRowAtIndexPath: indexPath)
         }
         
-        return tableView.dequeueReusableCellWithIdentifier("CheckMarkCell") as! CheckMarkCell
+        return tableView.dequeueReusableCellWithIdentifier(CellIdentifier.CheckMarkCell) as! CheckMarkCell
+    }
+    
+    func cellForMininumStars(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        
+        let minStarsCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.ValueSliderCell) as! ValueSliderCell
+        
+        minStarsCell.configure(PrefRowIdentifier.MininumStars, valueMinimum: 0, valueMaximum: 5000)
+        minStarsCell.slider.value = Float(settings.minStars)
+        minStarsCell.valueLabel.text = String(settings.minStars)
+        minStarsCell.valueIdentifer = PrefRowIdentifier.MininumStars
+        minStarsCell.delegate = self
+        return minStarsCell
+    }
+    
+    func cellForFilterByLanguage(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        if indexPath.row == 0 {
+            let filterLanguagesCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.SwitchCell) as! SwitchCell
+            filterLanguagesCell.descriptionLabel.text = PrefRowIdentifier.FilterByLanguage
+            filterLanguagesCell.switchIdentifier = PrefRowIdentifier.FilterByLanguage
+            filterLanguagesCell.onOffSwitch.on = settings.shouldFilterLanguages
+            filterLanguagesCell.delegate = self
+            return filterLanguagesCell
+        } else if indexPath.row <= languages.count {
+            let languageCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.CheckMarkCell) as! CheckMarkCell
+            languageCell.descriptionLabel.text = languages[indexPath.row - 1]
+            languageCell.switchIdentifier = PrefRowIdentifier.Language + languages[indexPath.row - 1]
+            languageCell.isChecked = settings.includeLanguage[indexPath.row - 1]
+            languageCell.delegate = self
+            return languageCell
+        }
+        
+        return tableView.dequeueReusableCellWithIdentifier(CellIdentifier.CheckMarkCell) as! CheckMarkCell
     }
 }
 
@@ -100,7 +131,7 @@ extension SearchSettingsViewController: ValueSliderCellDelegate {
     func sliderValueDidChange(cell: ValueSliderCell, valueIdentifier: AnyObject, newValue: Float) {
         
         if let identifier = valueIdentifier as? String {
-            if identifier == "Mininum Stars" {
+            if identifier == PrefRowIdentifier.MininumStars {
                 settings?.minStars = Int(newValue)
                 tableView.reloadData()
             }
@@ -113,14 +144,14 @@ extension SearchSettingsViewController: ToggleCellDelegate {
     func toggleCellDidToggle(cell: UITableViewCell, toggleIdenfifier: AnyObject, newValue:Bool) {
         
         if let identifier = toggleIdenfifier as? String {
-            if identifier == "Filter by Language" {
+            if identifier == PrefRowIdentifier.FilterByLanguage {
                 settings?.shouldFilterLanguages = newValue
                 tableView.reloadData()
-            } else if identifier.hasPrefix("language:") {
+            } else if identifier.hasPrefix(PrefRowIdentifier.Language) {
                 // get language identifier and find its index in the array
-                let index = identifier.rangeOfString("language:")?.endIndex
+                let index = identifier.rangeOfString(PrefRowIdentifier.Language)?.endIndex
                 let language = identifier.substringFromIndex(index!)
-                let languageIndex = settings.languages.indexOf(language)
+                let languageIndex = languages.indexOf(language)
                 if let languageIndex = languageIndex {
                     settings.includeLanguage[languageIndex] = newValue
                 }
