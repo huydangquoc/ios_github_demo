@@ -23,6 +23,7 @@ class CheckMarkCell: UITableViewCell {
             }
         }
     }
+    var key: String = ""
     weak var delegate: ToggleCellDelegate?
     
     override func awakeFromNib() {

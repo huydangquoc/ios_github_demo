@@ -6,6 +6,8 @@
 //  Copyright (c) 2015 codepath. All rights reserved.
 //
 
+// sample query: https://api.github.com/search/repositories?q=tetris+language:assembly&sort=stars&order=desc
+
 import Foundation
 import AFNetworking
 
@@ -86,7 +88,15 @@ class GithubRepo: CustomStringConvertible {
         var q = "";
         if let searchString = settings.searchString {
             q = q + searchString;
+            
+            // set filter for search
+            for (index, searchInField) in searchInFields.enumerate() {
+                if settings.includeSearchFields[index] {
+                    q = q + " in:\(searchInField)"
+                }
+            }
         }
+        
         q = q + " stars:>\(settings.minStars)";
         
         if settings.shouldFilterLanguages {
@@ -100,6 +110,8 @@ class GithubRepo: CustomStringConvertible {
         params["q"] = q;
         params["sort"] = "stars";
         params["order"] = "desc";
+        
+        print(params)
         
         return params;
     }

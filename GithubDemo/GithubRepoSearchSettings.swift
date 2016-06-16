@@ -15,6 +15,10 @@ let languages = ["Java",
                  "Ruby",
                  "Swift"]
 
+let searchInFields = ["name",
+                    "description",
+                    "readme"]
+
 //enum Language : String {
 //    case Java = "Java"
 //    case JavaScript = "JavaScript"
@@ -41,4 +45,7 @@ struct GithubRepoSearchSettings {
                            true,    // Python
                            true,    // Ruby
                            true]    // Swift
+    var includeSearchFields = [true,    // name
+                               true,    // description
+                               true]    // readme
 }

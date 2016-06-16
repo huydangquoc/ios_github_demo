@@ -12,6 +12,7 @@ struct PrefRowIdentifier {
     static let MininumStars = "Mininum Stars"
     static let FilterByLanguage = "Filter by Language"
     static let Language = "language:"
+    static let SearchIn = "in:"
 }
 
 struct CellIdentifier {
@@ -23,6 +24,7 @@ struct CellIdentifier {
 enum PrefSection : Int {
     case MininumStars = 0
     case FilterByLanguage
+    case SearchIn
 }
 
 class SearchSettingsViewController: UIViewController {
@@ -31,7 +33,8 @@ class SearchSettingsViewController: UIViewController {
     
     var settings: GithubRepoSearchSettings!
     let tableStructure: [[String]] = [[PrefRowIdentifier.MininumStars],
-                                      [PrefRowIdentifier.FilterByLanguage, PrefRowIdentifier.Language]]
+                                      [PrefRowIdentifier.FilterByLanguage, PrefRowIdentifier.Language],
+                                      [PrefRowIdentifier.SearchIn]]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -39,6 +42,10 @@ class SearchSettingsViewController: UIViewController {
         // Do any additional setup after loading the view.
         tableView.dataSource = self
         tableView.delegate = self
+        
+        // remove empty rows by setting empty footer
+        // ref: http://stackoverflow.com/questions/14520185/how-to-remove-empty-cells-in-uitableview
+        tableView.tableFooterView = UIView()
     }
 
     override func didReceiveMemoryWarning() {
@@ -69,29 +76,35 @@ extension SearchSettingsViewController: UITableViewDataSource {
     // Tells the data source to return the number of rows in a given section of a table view.
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        if section == PrefSection.MininumStars.rawValue {
-            return 1
-        } else if section == PrefSection.FilterByLanguage.rawValue {
+        var numOfRows = 0
+        
+        switch PrefSection(rawValue: section)! {
+        case .MininumStars:
+            numOfRows = 1
+        case .FilterByLanguage:
             if settings.shouldFilterLanguages {
-                return 1 + languages.count
+                numOfRows = 1 + languages.count
+            } else {
+                numOfRows = 1
             }
-            return 1
+        case .SearchIn:
+            numOfRows = searchInFields.count
         }
         
-        return 0
+        return numOfRows
     }
     
     // Asks the data source for a cell to insert in a particular location of the table view.
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        if indexPath.section == PrefSection.MininumStars.rawValue {
+        switch PrefSection(rawValue: indexPath.section)! {
+        case .MininumStars:
             return cellForMininumStars(tableView, cellForRowAtIndexPath: indexPath)
-            
-        } else if indexPath.section == PrefSection.FilterByLanguage.rawValue {
+        case .FilterByLanguage:
             return cellForFilterByLanguage(tableView, cellForRowAtIndexPath: indexPath)
+        case .SearchIn:
+            return cellSearchIn(tableView, cellForRowAtIndexPath: indexPath)
         }
-        
-        return tableView.dequeueReusableCellWithIdentifier(CellIdentifier.CheckMarkCell) as! CheckMarkCell
     }
     
     func cellForMininumStars(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -103,6 +116,7 @@ extension SearchSettingsViewController: UITableViewDataSource {
         minStarsCell.valueLabel.text = String(settings.minStars)
         minStarsCell.valueIdentifer = PrefRowIdentifier.MininumStars
         minStarsCell.delegate = self
+        
         return minStarsCell
     }
     
@@ -114,17 +128,30 @@ extension SearchSettingsViewController: UITableViewDataSource {
             filterLanguagesCell.onOffSwitch.on = settings.shouldFilterLanguages
             filterLanguagesCell.delegate = self
             return filterLanguagesCell
-        } else if indexPath.row <= languages.count {
+        } else {
             let languageCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.CheckMarkCell) as! CheckMarkCell
             languageCell.descriptionLabel.text = languages[indexPath.row - 1]
-            languageCell.switchIdentifier = PrefRowIdentifier.Language + languages[indexPath.row - 1]
+            languageCell.switchIdentifier = PrefRowIdentifier.Language
+            languageCell.key = languages[indexPath.row - 1]
             languageCell.isChecked = settings.includeLanguage[indexPath.row - 1]
             languageCell.delegate = self
             return languageCell
         }
-        
-        return tableView.dequeueReusableCellWithIdentifier(CellIdentifier.CheckMarkCell) as! CheckMarkCell
     }
+    
+    func cellSearchIn(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        
+        let searchInCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.CheckMarkCell) as! CheckMarkCell
+        
+        searchInCell.descriptionLabel.text = "Search in \(searchInFields[indexPath.row])"
+        searchInCell.switchIdentifier = PrefRowIdentifier.SearchIn
+        searchInCell.key = searchInFields[indexPath.row]
+        searchInCell.isChecked = settings.includeSearchFields[indexPath.row]
+        searchInCell.delegate = self
+        
+        return searchInCell
+    }
+    
 }
 
 extension SearchSettingsViewController: UITableViewDelegate {
@@ -132,16 +159,7 @@ extension SearchSettingsViewController: UITableViewDelegate {
     // Asks the delegate for the height to use for the header of a particular section.
     func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         
-        var headerHeight: CGFloat
-        
-        switch PrefSection(rawValue: section)! {
-        case .FilterByLanguage:
-            headerHeight = 50
-        default:
-            headerHeight = 0
-        }
-        
-        return headerHeight
+        return 50
     }
     
     // Asks the delegate for a view object to display in the header of the specified section of the table view.
@@ -153,6 +171,12 @@ extension SearchSettingsViewController: UITableViewDelegate {
 //    
 //        return headerView
 //    }
+    
+    // Tells the delegate that the specified row is now selected.
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        
+        tableView.deselectRowAtIndexPath(indexPath, animated: false)
+    }
 }
 
 extension SearchSettingsViewController: ValueSliderCellDelegate {
@@ -176,13 +200,15 @@ extension SearchSettingsViewController: ToggleCellDelegate {
             if identifier == PrefRowIdentifier.FilterByLanguage {
                 settings?.shouldFilterLanguages = newValue
                 tableView.reloadData()
-            } else if identifier.hasPrefix(PrefRowIdentifier.Language) {
-                // get language identifier and find its index in the array
-                let index = identifier.rangeOfString(PrefRowIdentifier.Language)?.endIndex
-                let language = identifier.substringFromIndex(index!)
-                let languageIndex = languages.indexOf(language)
-                if let languageIndex = languageIndex {
-                    settings.includeLanguage[languageIndex] = newValue
+            } else if identifier == PrefRowIdentifier.Language {
+                let languageCell = cell as! CheckMarkCell
+                if let index = languages.indexOf(languageCell.key) {
+                    settings.includeLanguage[index] = newValue
+                }
+            } else if identifier == PrefRowIdentifier.SearchIn {
+                let searchInCell = cell as! CheckMarkCell
+                if let index = searchInFields.indexOf(searchInCell.key) {
+                    settings.includeSearchFields[index] = newValue
                 }
             }
         }
