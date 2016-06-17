@@ -88,16 +88,18 @@ class GithubRepo: CustomStringConvertible {
         var q = "";
         if let searchString = settings.searchString {
             q = q + searchString;
-            
-            // set filter for search
+        }
+        
+        q = q + " stars:>\(settings.minStars)";
+        
+        // set filter for search
+        if settings.shouldScopeSearchIn {
             for (index, searchInField) in searchInFields.enumerate() {
                 if settings.includeSearchFields[index] {
                     q = q + " in:\(searchInField)"
                 }
             }
         }
-        
-        q = q + " stars:>\(settings.minStars)";
         
         if settings.shouldFilterLanguages {
             for (index, language) in languages.enumerate() {
@@ -110,8 +112,6 @@ class GithubRepo: CustomStringConvertible {
         params["q"] = q;
         params["sort"] = "stars";
         params["order"] = "desc";
-        
-        print(params)
         
         return params;
     }

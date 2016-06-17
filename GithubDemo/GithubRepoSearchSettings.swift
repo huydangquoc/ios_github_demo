@@ -45,6 +45,7 @@ struct GithubRepoSearchSettings {
                            true,    // Python
                            true,    // Ruby
                            true]    // Swift
+    var shouldScopeSearchIn = false;
     var includeSearchFields = [true,    // name
                                true,    // description
                                true]    // readme

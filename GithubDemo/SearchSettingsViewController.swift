@@ -12,6 +12,7 @@ struct PrefRowIdentifier {
     static let MininumStars = "Mininum Stars"
     static let FilterByLanguage = "Filter by Language"
     static let Language = "language:"
+    static let ScopeSearchIn = "Scope to search"
     static let SearchIn = "in:"
 }
 
@@ -24,7 +25,7 @@ struct CellIdentifier {
 enum PrefSection : Int {
     case MininumStars = 0
     case FilterByLanguage
-    case SearchIn
+    case ScopeSearchIn
 }
 
 class SearchSettingsViewController: UIViewController {
@@ -34,7 +35,7 @@ class SearchSettingsViewController: UIViewController {
     var settings: GithubRepoSearchSettings!
     let tableStructure: [[String]] = [[PrefRowIdentifier.MininumStars],
                                       [PrefRowIdentifier.FilterByLanguage, PrefRowIdentifier.Language],
-                                      [PrefRowIdentifier.SearchIn]]
+                                      [PrefRowIdentifier.ScopeSearchIn, PrefRowIdentifier.SearchIn]]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -87,8 +88,12 @@ extension SearchSettingsViewController: UITableViewDataSource {
             } else {
                 numOfRows = 1
             }
-        case .SearchIn:
-            numOfRows = searchInFields.count
+        case .ScopeSearchIn:
+            if settings.shouldScopeSearchIn {
+                numOfRows = 1 + searchInFields.count
+            } else {
+                numOfRows = 1
+            }
         }
         
         return numOfRows
@@ -102,7 +107,7 @@ extension SearchSettingsViewController: UITableViewDataSource {
             return cellForMininumStars(tableView, cellForRowAtIndexPath: indexPath)
         case .FilterByLanguage:
             return cellForFilterByLanguage(tableView, cellForRowAtIndexPath: indexPath)
-        case .SearchIn:
+        case .ScopeSearchIn:
             return cellSearchIn(tableView, cellForRowAtIndexPath: indexPath)
         }
     }
@@ -141,15 +146,22 @@ extension SearchSettingsViewController: UITableViewDataSource {
     
     func cellSearchIn(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         
-        let searchInCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.CheckMarkCell) as! CheckMarkCell
-        
-        searchInCell.descriptionLabel.text = "Search in \(searchInFields[indexPath.row])"
-        searchInCell.switchIdentifier = PrefRowIdentifier.SearchIn
-        searchInCell.key = searchInFields[indexPath.row]
-        searchInCell.isChecked = settings.includeSearchFields[indexPath.row]
-        searchInCell.delegate = self
-        
-        return searchInCell
+        if indexPath.row == 0 {
+            let scopeSearchInCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.SwitchCell) as! SwitchCell
+            scopeSearchInCell.descriptionLabel.text = PrefRowIdentifier.ScopeSearchIn
+            scopeSearchInCell.switchIdentifier = PrefRowIdentifier.ScopeSearchIn
+            scopeSearchInCell.onOffSwitch.on = settings.shouldScopeSearchIn
+            scopeSearchInCell.delegate = self
+            return scopeSearchInCell
+        } else {
+            let searchInCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.CheckMarkCell) as! CheckMarkCell
+            searchInCell.descriptionLabel.text = "Search in \(searchInFields[indexPath.row - 1])"
+            searchInCell.switchIdentifier = PrefRowIdentifier.SearchIn
+            searchInCell.key = searchInFields[indexPath.row - 1]
+            searchInCell.isChecked = settings.includeSearchFields[indexPath.row - 1]
+            searchInCell.delegate = self
+            return searchInCell
+        }
     }
     
 }
@@ -205,7 +217,11 @@ extension SearchSettingsViewController: ToggleCellDelegate {
                 if let index = languages.indexOf(languageCell.key) {
                     settings.includeLanguage[index] = newValue
                 }
-            } else if identifier == PrefRowIdentifier.SearchIn {
+            } else if identifier == PrefRowIdentifier.ScopeSearchIn {
+                settings?.shouldScopeSearchIn = newValue
+                tableView.reloadData()
+            }
+            else if identifier == PrefRowIdentifier.SearchIn {
                 let searchInCell = cell as! CheckMarkCell
                 if let index = searchInFields.indexOf(searchInCell.key) {
                     settings.includeSearchFields[index] = newValue
