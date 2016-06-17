@@ -109,6 +109,10 @@ class GithubRepo: CustomStringConvertible {
             }
         }
         
+        if settings.shouldFilterCreatedDate {
+            q = q + " created:>" + getDateAsSelection(settings.createdBefore)
+        }
+        
         params["q"] = q;
         if settings.shouldSortBy {
             params["sort"] = settings.sortBy;
@@ -116,6 +120,28 @@ class GithubRepo: CustomStringConvertible {
         params["order"] = "desc";
         
         return params;
+    }
+    
+    // ref: http://stackoverflow.com/questions/28587311/how-do-you-get-last-weeks-date-in-swift-in-yyyy-mm-dd-format
+    private class func getDateAsSelection(selection: CreatedIn) -> String {
+        
+        let calendar = NSCalendar.currentCalendar()
+        let current = NSDate()
+        let styler = NSDateFormatter()
+        let option = NSCalendarOptions()
+        styler.dateFormat = "yyyy-MM-dd"
+        
+        var date: NSDate
+        switch selection {
+        case .LastWeek:
+            date = calendar.dateByAddingUnit(.WeekOfYear, value: -1, toDate: current, options: option)!
+        case .LastMonth:
+            date = calendar.dateByAddingUnit(.Month, value: -1, toDate: current, options: option)!
+        case .LastYear:
+            date = calendar.dateByAddingUnit(.Year, value: -1, toDate: current, options: option)!
+        }
+        
+        return styler.stringFromDate(date)
     }
 
     // Creates a text representation of a GitHub repo

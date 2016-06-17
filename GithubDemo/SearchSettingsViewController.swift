@@ -16,6 +16,8 @@ struct PrefRowIdentifier {
     static let SearchIn = "in:"
     static let SortBy = "Sort by"
     static let SortField = "Sort field"
+    static let CreatedWithin = "Created within"
+    static let DateFilter = "Date filter"
 }
 
 struct CellIdentifier {
@@ -29,6 +31,7 @@ enum PrefSection : Int {
     case FilterByLanguage
     case ScopeSearchIn
     case SortBy
+    case CreatedWithin
 }
 
 class SearchSettingsViewController: UIViewController {
@@ -39,7 +42,8 @@ class SearchSettingsViewController: UIViewController {
     let tableStructure: [[String]] = [[PrefRowIdentifier.MininumStars],
                                       [PrefRowIdentifier.FilterByLanguage, PrefRowIdentifier.Language],
                                       [PrefRowIdentifier.ScopeSearchIn, PrefRowIdentifier.SearchIn],
-                                      [PrefRowIdentifier.SortBy, PrefRowIdentifier.SortField]]
+                                      [PrefRowIdentifier.SortBy, PrefRowIdentifier.SortField],
+                                      [PrefRowIdentifier.CreatedWithin, PrefRowIdentifier.DateFilter]]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -104,6 +108,12 @@ extension SearchSettingsViewController: UITableViewDataSource {
             } else {
                 numOfRows = 1
             }
+        case .CreatedWithin:
+            if settings.shouldFilterCreatedDate {
+                numOfRows = 1 + createdIns.count
+            } else {
+                numOfRows = 1
+            }
         }
         
         return numOfRows
@@ -121,6 +131,8 @@ extension SearchSettingsViewController: UITableViewDataSource {
             return cellSearchIn(tableView, cellForRowAtIndexPath: indexPath)
         case .SortBy:
             return cellSortBy(tableView, cellForRowAtIndexPath: indexPath)
+        case .CreatedWithin:
+            return cellCreatedWithin(tableView, cellForRowAtIndexPath: indexPath)
         }
     }
     
@@ -195,6 +207,26 @@ extension SearchSettingsViewController: UITableViewDataSource {
             return sortFieldCell
         }
     }
+    
+    func cellCreatedWithin(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        
+        if indexPath.row == 0 {
+            let createdWithinCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.SwitchCell) as! SwitchCell
+            createdWithinCell.descriptionLabel.text = PrefRowIdentifier.CreatedWithin
+            createdWithinCell.switchIdentifier = PrefRowIdentifier.CreatedWithin
+            createdWithinCell.onOffSwitch.on = settings.shouldFilterCreatedDate
+            createdWithinCell.delegate = self
+            return createdWithinCell
+        } else {
+            let dateFilterCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.CheckMarkCell) as! CheckMarkCell
+            dateFilterCell.descriptionLabel.text = createdIns[indexPath.row - 1]
+            dateFilterCell.switchIdentifier = PrefRowIdentifier.DateFilter
+            dateFilterCell.key = createdIns[indexPath.row - 1]
+            dateFilterCell.isChecked = CreatedIn(rawValue: dateFilterCell.key)! == settings.createdBefore
+            dateFilterCell.delegate = self
+            return dateFilterCell
+        }
+    }
 }
 
 extension SearchSettingsViewController: UITableViewDelegate {
@@ -262,6 +294,13 @@ extension SearchSettingsViewController: ToggleCellDelegate {
             } else if identifier == PrefRowIdentifier.SortField {
                 let sortFieldCell = cell as! CheckMarkCell
                 settings.sortBy = sortFieldCell.key
+                tableView.reloadData()
+            } else if identifier == PrefRowIdentifier.CreatedWithin {
+                settings?.shouldFilterCreatedDate = newValue
+                tableView.reloadData()
+            } else if identifier == PrefRowIdentifier.DateFilter {
+                let dateFilterCell = cell as! CheckMarkCell
+                settings.createdBefore = CreatedIn(rawValue: dateFilterCell.key)!
                 tableView.reloadData()
             }
         }

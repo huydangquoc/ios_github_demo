@@ -40,7 +40,5 @@ class CheckMarkCell: UITableViewCell {
             delegate?.toggleCellDidToggle(self, toggleIdenfifier: switchIdentifier, newValue: isChecked)
             super.setSelected(false, animated: true)
         }
-
     }
-    
 }

@@ -23,6 +23,20 @@ let sortBys = ["stars",
                "forks",
                "updated"]
 
+enum CreatedIn : String {
+    case LastWeek = "last week"
+    case LastMonth = "last month"
+    case LastYear = "last year"
+    
+    static func toArray() -> [String] {
+        return [LastWeek.rawValue,
+                LastMonth.rawValue,
+                LastYear.rawValue]
+    }
+}
+
+let createdIns = CreatedIn.toArray()
+
 //enum Language : String {
 //    case Java = "Java"
 //    case JavaScript = "JavaScript"
@@ -55,4 +69,6 @@ struct GithubRepoSearchSettings {
                                true]    // readme
     var shouldSortBy = false
     var sortBy = sortBys[0]
+    var shouldFilterCreatedDate = false
+    var createdBefore = CreatedIn.LastWeek
 }
