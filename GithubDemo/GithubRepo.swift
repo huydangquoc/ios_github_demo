@@ -110,7 +110,9 @@ class GithubRepo: CustomStringConvertible {
         }
         
         params["q"] = q;
-        params["sort"] = "stars";
+        if settings.shouldSortBy {
+            params["sort"] = settings.sortBy;
+        }
         params["order"] = "desc";
         
         return params;

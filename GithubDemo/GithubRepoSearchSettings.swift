@@ -19,6 +19,10 @@ let searchInFields = ["name",
                     "description",
                     "readme"]
 
+let sortBys = ["stars",
+               "forks",
+               "updated"]
+
 //enum Language : String {
 //    case Java = "Java"
 //    case JavaScript = "JavaScript"
@@ -38,7 +42,7 @@ struct GithubRepoSearchSettings {
     
     var searchString: String? = nil
     var minStars = 0
-    var shouldFilterLanguages = false;
+    var shouldFilterLanguages = false
     var includeLanguage = [true,    // Java
                            true,    // JavaScript
                            true,    // Objective-C
@@ -49,4 +53,6 @@ struct GithubRepoSearchSettings {
     var includeSearchFields = [true,    // name
                                true,    // description
                                true]    // readme
+    var shouldSortBy = false
+    var sortBy = sortBys[0]
 }

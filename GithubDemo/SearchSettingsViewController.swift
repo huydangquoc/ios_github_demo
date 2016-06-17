@@ -14,6 +14,8 @@ struct PrefRowIdentifier {
     static let Language = "language:"
     static let ScopeSearchIn = "Scope to search"
     static let SearchIn = "in:"
+    static let SortBy = "Sort by"
+    static let SortField = "Sort field"
 }
 
 struct CellIdentifier {
@@ -26,6 +28,7 @@ enum PrefSection : Int {
     case MininumStars = 0
     case FilterByLanguage
     case ScopeSearchIn
+    case SortBy
 }
 
 class SearchSettingsViewController: UIViewController {
@@ -35,7 +38,8 @@ class SearchSettingsViewController: UIViewController {
     var settings: GithubRepoSearchSettings!
     let tableStructure: [[String]] = [[PrefRowIdentifier.MininumStars],
                                       [PrefRowIdentifier.FilterByLanguage, PrefRowIdentifier.Language],
-                                      [PrefRowIdentifier.ScopeSearchIn, PrefRowIdentifier.SearchIn]]
+                                      [PrefRowIdentifier.ScopeSearchIn, PrefRowIdentifier.SearchIn],
+                                      [PrefRowIdentifier.SortBy, PrefRowIdentifier.SortField]]
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -94,6 +98,12 @@ extension SearchSettingsViewController: UITableViewDataSource {
             } else {
                 numOfRows = 1
             }
+        case .SortBy:
+            if settings.shouldSortBy {
+                numOfRows = 1 + sortBys.count
+            } else {
+                numOfRows = 1
+            }
         }
         
         return numOfRows
@@ -109,6 +119,8 @@ extension SearchSettingsViewController: UITableViewDataSource {
             return cellForFilterByLanguage(tableView, cellForRowAtIndexPath: indexPath)
         case .ScopeSearchIn:
             return cellSearchIn(tableView, cellForRowAtIndexPath: indexPath)
+        case .SortBy:
+            return cellSortBy(tableView, cellForRowAtIndexPath: indexPath)
         }
     }
     
@@ -164,6 +176,25 @@ extension SearchSettingsViewController: UITableViewDataSource {
         }
     }
     
+    func cellSortBy(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        
+        if indexPath.row == 0 {
+            let sortByCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.SwitchCell) as! SwitchCell
+            sortByCell.descriptionLabel.text = PrefRowIdentifier.SortBy
+            sortByCell.switchIdentifier = PrefRowIdentifier.SortBy
+            sortByCell.onOffSwitch.on = settings.shouldSortBy
+            sortByCell.delegate = self
+            return sortByCell
+        } else {
+            let sortFieldCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.CheckMarkCell) as! CheckMarkCell
+            sortFieldCell.descriptionLabel.text = sortBys[indexPath.row - 1]
+            sortFieldCell.switchIdentifier = PrefRowIdentifier.SortField
+            sortFieldCell.key = sortBys[indexPath.row - 1]
+            sortFieldCell.isChecked = sortFieldCell.key == settings.sortBy
+            sortFieldCell.delegate = self
+            return sortFieldCell
+        }
+    }
 }
 
 extension SearchSettingsViewController: UITableViewDelegate {
@@ -220,12 +251,18 @@ extension SearchSettingsViewController: ToggleCellDelegate {
             } else if identifier == PrefRowIdentifier.ScopeSearchIn {
                 settings?.shouldScopeSearchIn = newValue
                 tableView.reloadData()
-            }
-            else if identifier == PrefRowIdentifier.SearchIn {
+            } else if identifier == PrefRowIdentifier.SearchIn {
                 let searchInCell = cell as! CheckMarkCell
                 if let index = searchInFields.indexOf(searchInCell.key) {
                     settings.includeSearchFields[index] = newValue
                 }
+            } else if identifier == PrefRowIdentifier.SortBy {
+                settings?.shouldSortBy = newValue
+                tableView.reloadData()
+            } else if identifier == PrefRowIdentifier.SortField {
+                let sortFieldCell = cell as! CheckMarkCell
+                settings.sortBy = sortFieldCell.key
+                tableView.reloadData()
             }
         }
     }
