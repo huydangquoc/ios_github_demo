@@ -103,7 +103,7 @@ class GithubRepo: CustomStringConvertible {
         
         if settings.shouldFilterLanguages {
             for (index, language) in languages.enumerate() {
-                if settings.includeLanguage[index] {
+                if settings.includeLanguage[index].active {
                     q = q + " language:\"\(language)\""
                 }
             }

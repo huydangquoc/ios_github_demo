@@ -162,7 +162,7 @@ extension SearchSettingsViewController: UITableViewDataSource {
             languageCell.descriptionLabel.text = languages[indexPath.row - 1]
             languageCell.switchIdentifier = PrefRowIdentifier.Language
             languageCell.key = languages[indexPath.row - 1]
-            languageCell.isChecked = settings.includeLanguage[indexPath.row - 1]
+            languageCell.isChecked = settings.includeLanguage[indexPath.row - 1].active
             languageCell.delegate = self
             return languageCell
         }
@@ -278,7 +278,7 @@ extension SearchSettingsViewController: ToggleCellDelegate {
             } else if identifier == PrefRowIdentifier.Language {
                 let languageCell = cell as! CheckMarkCell
                 if let index = languages.indexOf(languageCell.key) {
-                    settings.includeLanguage[index] = newValue
+                    settings.includeLanguage[index].active = newValue
                 }
             } else if identifier == PrefRowIdentifier.ScopeSearchIn {
                 settings?.shouldScopeSearchIn = newValue

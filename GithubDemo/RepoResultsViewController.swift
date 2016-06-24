@@ -35,6 +35,14 @@ class RepoResultsViewController: UIViewController {
         searchBar.sizeToFit()
         navigationItem.titleView = searchBar
 
+        // load list of languages
+        fetchGithubLanguage({ (langs) -> Void in
+            for lang in langs {
+                languages.append(lang.name)
+            }
+            self.searchSettings.includeLanguage = langs
+        })
+        
         // Perform the first search when the view controller first loads
         doSearch()
     }
@@ -46,11 +54,6 @@ class RepoResultsViewController: UIViewController {
 
         // Perform request to GitHub API to get the list of repositories
         GithubRepo.fetchRepos(searchSettings, successCallback: { (newRepos) -> Void in
-
-//            // Print the returned repositories to the output window
-//            for repo in newRepos {
-//                print(repo)
-//            }
             
             self.repos = newRepos
             self.tableView.reloadData()
