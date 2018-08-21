@@ -12,14 +12,14 @@ class CheckMarkCell: UITableViewCell {
 
     @IBOutlet weak var descriptionLabel: UILabel!
     
-    var switchIdentifier: AnyObject = ""
+    var switchIdentifier: AnyObject = "" as AnyObject
     var isChecked: Bool = false
         {
         didSet {
             if isChecked {
-                self.accessoryType = .Checkmark
+                self.accessoryType = .checkmark
             } else {
-                self.accessoryType = .None
+                self.accessoryType = .none
             }
         }
     }
@@ -32,9 +32,9 @@ class CheckMarkCell: UITableViewCell {
     }
 
     // Sets the selected state of the cell, optionally animating the transition between states.
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         
-        if selected && !self.selected {
+        if selected && !self.isSelected {
             super.setSelected(true, animated: true)
             isChecked = !isChecked
             delegate?.toggleCellDidToggle(self, toggleIdenfifier: switchIdentifier, newValue: isChecked)

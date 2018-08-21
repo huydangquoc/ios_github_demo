@@ -24,13 +24,13 @@ class GithubRepoCell: UITableViewCell {
         //nameLabel.preferredMaxLayoutWidth = nameLabel.frame.size.width
     }
 
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
         // Configure the view for the selected state
     }
     
-    func setContentWithRepo(repo: GithubRepo) {
+    func setContentWithRepo(_ repo: GithubRepo) {
         nameLabel.text = repo.name
         ownerLabel.text = repo.ownerHandle
         if let stars = repo.stars {
@@ -42,8 +42,8 @@ class GithubRepoCell: UITableViewCell {
         }
         
         if let urlString = repo.ownerAvatarURL {
-            let ownerAvatarURL = NSURL(string: urlString)!
-            ownerAvatarImage.setImageWithURL(ownerAvatarURL)
+            let ownerAvatarURL = URL(string: urlString)!
+            ownerAvatarImage.setImageWith(ownerAvatarURL)
         }
         descriptionLabel.text = repo.desc
     }

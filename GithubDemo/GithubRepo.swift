@@ -54,12 +54,13 @@ class GithubRepo: CustomStringConvertible {
     
     // Actually fetch the list of repositories from the GitHub API.
     // Calls successCallback(...) if the request is successful
-    class func fetchRepos(settings: GithubRepoSearchSettings, successCallback: ([GithubRepo]) -> Void, error: ((NSError?) -> Void)?) {
+    class func fetchRepos(_ settings: GithubRepoSearchSettings, successCallback: @escaping ([GithubRepo]) -> Void, error: ((NSError?) -> Void)?) {
         let manager = AFHTTPRequestOperationManager()
         let params = queryParamsWithSettings(settings);
         
-        manager.GET(reposUrl, parameters: params, success: { (operation ,responseObject) -> Void in
-            if let results = responseObject["items"] as? NSArray {
+        manager.get(reposUrl, parameters: params, success: { (operation ,responseObject) -> Void in
+            if let response = responseObject as? [String:Any],
+                   let results = response["items"] as? NSArray {
                 var repos: [GithubRepo] = []
                 for result in results as! [NSDictionary] {
                     repos.append(GithubRepo(jsonResult: result))
@@ -68,14 +69,14 @@ class GithubRepo: CustomStringConvertible {
             }
         }, failure: { (operation, requestError) -> Void in
             if let errorCallback = error {
-                errorCallback(requestError)
+                errorCallback(requestError as NSError)
             }
         })
     }
     
     // Helper method that constructs a dictionary of the query parameters used in the request to the
     // GitHub API
-    private class func queryParamsWithSettings(settings: GithubRepoSearchSettings) -> [String: String] {
+    fileprivate class func queryParamsWithSettings(_ settings: GithubRepoSearchSettings) -> [String: String] {
         var params: [String:String] = [:];
         if let clientId = clientId {
             params["client_id"] = clientId;
@@ -94,7 +95,7 @@ class GithubRepo: CustomStringConvertible {
         
         // set filter for search
         if settings.shouldScopeSearchIn {
-            for (index, searchInField) in searchInFields.enumerate() {
+            for (index, searchInField) in searchInFields.enumerated() {
                 if settings.includeSearchFields[index] {
                     q = q + " in:\(searchInField)"
                 }
@@ -102,7 +103,7 @@ class GithubRepo: CustomStringConvertible {
         }
         
         if settings.shouldFilterLanguages {
-            for (index, language) in languages.enumerate() {
+            for (index, language) in languages.enumerated() {
                 if settings.includeLanguage[index].active {
                     q = q + " language:\"\(language)\""
                 }
@@ -123,25 +124,25 @@ class GithubRepo: CustomStringConvertible {
     }
     
     // ref: http://stackoverflow.com/questions/28587311/how-do-you-get-last-weeks-date-in-swift-in-yyyy-mm-dd-format
-    private class func getDateAsSelection(selection: CreatedIn) -> String {
+    fileprivate class func getDateAsSelection(_ selection: CreatedIn) -> String {
         
-        let calendar = NSCalendar.currentCalendar()
-        let current = NSDate()
-        let styler = NSDateFormatter()
-        let option = NSCalendarOptions()
+        let calendar = Calendar.current
+        let current = Date()
+        let styler = DateFormatter()
+        let option = NSCalendar.Options()
         styler.dateFormat = "yyyy-MM-dd"
         
-        var date: NSDate
+        var date: Date
         switch selection {
         case .LastWeek:
-            date = calendar.dateByAddingUnit(.WeekOfYear, value: -1, toDate: current, options: option)!
+            date = (calendar as NSCalendar).date(byAdding: .weekOfYear, value: -1, to: current, options: option)!
         case .LastMonth:
-            date = calendar.dateByAddingUnit(.Month, value: -1, toDate: current, options: option)!
+            date = (calendar as NSCalendar).date(byAdding: .month, value: -1, to: current, options: option)!
         case .LastYear:
-            date = calendar.dateByAddingUnit(.Year, value: -1, toDate: current, options: option)!
+            date = (calendar as NSCalendar).date(byAdding: .year, value: -1, to: current, options: option)!
         }
         
-        return styler.stringFromDate(date)
+        return styler.string(from: date)
     }
 
     // Creates a text representation of a GitHub repo

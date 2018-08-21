@@ -10,5 +10,5 @@ import UIKit
 
 protocol ToggleCellDelegate: class {
     
-    func toggleCellDidToggle(cell: UITableViewCell, toggleIdenfifier: AnyObject, newValue:Bool)
+    func toggleCellDidToggle(_ cell: UITableViewCell, toggleIdenfifier: AnyObject, newValue:Bool)
 }

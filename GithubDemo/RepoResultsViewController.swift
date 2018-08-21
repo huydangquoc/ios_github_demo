@@ -48,9 +48,9 @@ class RepoResultsViewController: UIViewController {
     }
 
     // Perform the search.
-    private func doSearch() {
+    fileprivate func doSearch() {
 
-        MBProgressHUD.showHUDAddedTo(self.view, animated: true)
+        MBProgressHUD.showAdded(to: self.view, animated: true)
 
         // Perform request to GitHub API to get the list of repositories
         GithubRepo.fetchRepos(searchSettings, successCallback: { (newRepos) -> Void in
@@ -58,30 +58,30 @@ class RepoResultsViewController: UIViewController {
             self.repos = newRepos
             self.tableView.reloadData()
 
-            MBProgressHUD.hideHUDForView(self.view, animated: true)
+            MBProgressHUD.hide(for: self.view, animated: true)
             }, error: { (error) -> Void in
                 print(error)
         })
     }
     
-    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         
         if segue.identifier == "settingsSegue" {
             // we wrapped our SearchSettingsViewController inside a UINavigationController
-            let navController = segue.destinationViewController as! UINavigationController
+            let navController = segue.destination as! UINavigationController
             let settingsVC = navController.topViewController as! SearchSettingsViewController
             settingsVC.settings = self.searchSettings
         }
     }
     
-    @IBAction func didSaveSettings(segue: UIStoryboardSegue) {
+    @IBAction func didSaveSettings(_ segue: UIStoryboardSegue) {
         
-        let settingsVC = segue.sourceViewController as! SearchSettingsViewController
+        let settingsVC = segue.source as! SearchSettingsViewController
         searchSettings = settingsVC.settings
         doSearch()
     }
     
-    @IBAction func didCancelSettingChanges(segue: UIStoryboardSegue) {
+    @IBAction func didCancelSettingChanges(_ segue: UIStoryboardSegue) {
         
     }
 }
@@ -89,22 +89,22 @@ class RepoResultsViewController: UIViewController {
 // SearchBar methods
 extension RepoResultsViewController: UISearchBarDelegate {
 
-    func searchBarShouldBeginEditing(searchBar: UISearchBar) -> Bool {
+    func searchBarShouldBeginEditing(_ searchBar: UISearchBar) -> Bool {
         searchBar.setShowsCancelButton(true, animated: true)
         return true;
     }
 
-    func searchBarShouldEndEditing(searchBar: UISearchBar) -> Bool {
+    func searchBarShouldEndEditing(_ searchBar: UISearchBar) -> Bool {
         searchBar.setShowsCancelButton(false, animated: true)
         return true;
     }
 
-    func searchBarCancelButtonClicked(searchBar: UISearchBar) {
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
         searchBar.text = ""
         searchBar.resignFirstResponder()
     }
 
-    func searchBarSearchButtonClicked(searchBar: UISearchBar) {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         searchSettings.searchString = searchBar.text
         searchBar.resignFirstResponder()
         doSearch()
@@ -115,21 +115,21 @@ extension RepoResultsViewController: UISearchBarDelegate {
 extension RepoResultsViewController: UITableViewDataSource, UITableViewDelegate {
     
     // Tells the delegate that the specified row is now selected.
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        tableView.deselectRow(at: indexPath, animated: true)
         searchBar.resignFirstResponder()
     }
     
     // Tells the data source to return the number of rows in a given section of a table view.
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return repos.count
     }
     
     // Asks the data source for a cell to insert in a particular location of the table view.
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
-        let cell = tableView.dequeueReusableCellWithIdentifier("GithubRepoCell") as! GithubRepoCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "GithubRepoCell") as! GithubRepoCell
         cell.setContentWithRepo(repos[indexPath.row])
         return cell
     }

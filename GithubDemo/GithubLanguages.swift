@@ -46,12 +46,12 @@ struct GithubLanguage {
     var active = true
 }
 
-func fetchGithubLanguage(successCallback: ([GithubLanguage]) -> Void) {
-    if let url = NSURL(string: repoLanguagesUrl) {
+func fetchGithubLanguage(_ successCallback: ([GithubLanguage]) -> Void) {
+    if let url = URL(string: repoLanguagesUrl) {
         do {
             // parse config file
-            let contents = try NSString(contentsOfURL: url, usedEncoding: nil)
-            let lines = (contents as String).componentsSeparatedByCharactersInSet(NSCharacterSet.newlineCharacterSet())
+            let contents = try NSString(contentsOf: url, usedEncoding: nil)
+            let lines = (contents as String).components(separatedBy: CharacterSet.newlines)
             var languages: [GithubLanguage] = []
             for line in lines {
                 if line.characters.last == ":" && line.characters.first != " " {

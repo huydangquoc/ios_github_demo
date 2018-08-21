@@ -14,7 +14,7 @@ class ValueSliderCell: UITableViewCell {
     @IBOutlet weak var label: UILabel!
     @IBOutlet weak var valueLabel: UILabel!
     
-    var valueIdentifer: AnyObject = ""
+    var valueIdentifer: AnyObject = "" as AnyObject
     weak var delegate: ValueSliderCellDelegate?
 
     override func awakeFromNib() {
@@ -22,19 +22,19 @@ class ValueSliderCell: UITableViewCell {
         // Initialization code
     }
 
-    override func setSelected(selected: Bool, animated: Bool) {
+    override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
 
         // Configure the view for the selected state
     }
     
-    func configure(labelText: String, valueMinimum: Float, valueMaximum: Float) {
+    func configure(_ labelText: String, valueMinimum: Float, valueMaximum: Float) {
         label.text = labelText
         slider.minimumValue = valueMinimum
         slider.maximumValue = valueMaximum
     }
     
-    @IBAction func valueDidChange(sender: AnyObject) {
+    @IBAction func valueDidChange(_ sender: AnyObject) {
         
         delegate?.sliderValueDidChange(self, valueIdentifier: valueIdentifer, newValue: slider.value)
     }

@@ -26,10 +26,15 @@ DEPENDENCIES:
   - AFNetworking (~> 2.0)
   - MBProgressHUD (~> 0.9.1)
 
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - AFNetworking
+    - MBProgressHUD
+
 SPEC CHECKSUMS:
   AFNetworking: 8e4e60500beb8bec644cf575beee72990a76d399
   MBProgressHUD: c47f2c166c126cf2ce36498d80f33e754d4e93ad
 
 PODFILE CHECKSUM: 642736e81508fe12213a4f80e61aa5c79c78ee15
 
-COCOAPODS: 1.0.0
+COCOAPODS: 1.5.3

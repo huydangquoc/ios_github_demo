@@ -10,5 +10,5 @@ import Foundation
 
 protocol ValueSliderCellDelegate: class {
     
-    func sliderValueDidChange(cell: ValueSliderCell, valueIdentifier: AnyObject, newValue: Float)
+    func sliderValueDidChange(_ cell: ValueSliderCell, valueIdentifier: AnyObject, newValue: Float)
 }

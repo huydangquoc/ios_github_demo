@@ -27,11 +27,11 @@ struct CellIdentifier {
 }
 
 enum PrefSection : Int {
-    case MininumStars = 0
-    case FilterByLanguage
-    case ScopeSearchIn
-    case SortBy
-    case CreatedWithin
+    case mininumStars = 0
+    case filterByLanguage
+    case scopeSearchIn
+    case sortBy
+    case createdWithin
 }
 
 class SearchSettingsViewController: UIViewController {
@@ -77,38 +77,38 @@ class SearchSettingsViewController: UIViewController {
 extension SearchSettingsViewController: UITableViewDataSource {
     
     // Asks the data source to return the number of sections in the table view.
-    func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         
         return self.tableStructure.count
     }
     
     // Tells the data source to return the number of rows in a given section of a table view.
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
         var numOfRows = 0
         
         switch PrefSection(rawValue: section)! {
-        case .MininumStars:
+        case .mininumStars:
             numOfRows = 1
-        case .FilterByLanguage:
+        case .filterByLanguage:
             if settings.shouldFilterLanguages {
                 numOfRows = 1 + languages.count
             } else {
                 numOfRows = 1
             }
-        case .ScopeSearchIn:
+        case .scopeSearchIn:
             if settings.shouldScopeSearchIn {
                 numOfRows = 1 + searchInFields.count
             } else {
                 numOfRows = 1
             }
-        case .SortBy:
+        case .sortBy:
             if settings.shouldSortBy {
                 numOfRows = 1 + sortBys.count
             } else {
                 numOfRows = 1
             }
-        case .CreatedWithin:
+        case .createdWithin:
             if settings.shouldFilterCreatedDate {
                 numOfRows = 1 + createdIns.count
             } else {
@@ -120,47 +120,47 @@ extension SearchSettingsViewController: UITableViewDataSource {
     }
     
     // Asks the data source for a cell to insert in a particular location of the table view.
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         switch PrefSection(rawValue: indexPath.section)! {
-        case .MininumStars:
+        case .mininumStars:
             return cellForMininumStars(tableView, cellForRowAtIndexPath: indexPath)
-        case .FilterByLanguage:
+        case .filterByLanguage:
             return cellForFilterByLanguage(tableView, cellForRowAtIndexPath: indexPath)
-        case .ScopeSearchIn:
+        case .scopeSearchIn:
             return cellSearchIn(tableView, cellForRowAtIndexPath: indexPath)
-        case .SortBy:
+        case .sortBy:
             return cellSortBy(tableView, cellForRowAtIndexPath: indexPath)
-        case .CreatedWithin:
+        case .createdWithin:
             return cellCreatedWithin(tableView, cellForRowAtIndexPath: indexPath)
         }
     }
     
-    func cellForMininumStars(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func cellForMininumStars(_ tableView: UITableView, cellForRowAtIndexPath indexPath: IndexPath) -> UITableViewCell {
         
-        let minStarsCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.ValueSliderCell) as! ValueSliderCell
+        let minStarsCell = tableView.dequeueReusableCell(withIdentifier: CellIdentifier.ValueSliderCell) as! ValueSliderCell
         
         minStarsCell.configure(PrefRowIdentifier.MininumStars, valueMinimum: 0, valueMaximum: 5000)
         minStarsCell.slider.value = Float(settings.minStars)
         minStarsCell.valueLabel.text = String(settings.minStars)
-        minStarsCell.valueIdentifer = PrefRowIdentifier.MininumStars
+        minStarsCell.valueIdentifer = PrefRowIdentifier.MininumStars as AnyObject
         minStarsCell.delegate = self
         
         return minStarsCell
     }
     
-    func cellForFilterByLanguage(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func cellForFilterByLanguage(_ tableView: UITableView, cellForRowAtIndexPath indexPath: IndexPath) -> UITableViewCell {
         if indexPath.row == 0 {
-            let filterLanguagesCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.SwitchCell) as! SwitchCell
+            let filterLanguagesCell = tableView.dequeueReusableCell(withIdentifier: CellIdentifier.SwitchCell) as! SwitchCell
             filterLanguagesCell.descriptionLabel.text = PrefRowIdentifier.FilterByLanguage
-            filterLanguagesCell.switchIdentifier = PrefRowIdentifier.FilterByLanguage
-            filterLanguagesCell.onOffSwitch.on = settings.shouldFilterLanguages
+            filterLanguagesCell.switchIdentifier = PrefRowIdentifier.FilterByLanguage as AnyObject
+            filterLanguagesCell.onOffSwitch.isOn = settings.shouldFilterLanguages
             filterLanguagesCell.delegate = self
             return filterLanguagesCell
         } else {
-            let languageCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.CheckMarkCell) as! CheckMarkCell
+            let languageCell = tableView.dequeueReusableCell(withIdentifier: CellIdentifier.CheckMarkCell) as! CheckMarkCell
             languageCell.descriptionLabel.text = languages[indexPath.row - 1]
-            languageCell.switchIdentifier = PrefRowIdentifier.Language
+            languageCell.switchIdentifier = PrefRowIdentifier.Language as AnyObject
             languageCell.key = languages[indexPath.row - 1]
             languageCell.isChecked = settings.includeLanguage[indexPath.row - 1].active
             languageCell.delegate = self
@@ -168,19 +168,19 @@ extension SearchSettingsViewController: UITableViewDataSource {
         }
     }
     
-    func cellSearchIn(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func cellSearchIn(_ tableView: UITableView, cellForRowAtIndexPath indexPath: IndexPath) -> UITableViewCell {
         
         if indexPath.row == 0 {
-            let scopeSearchInCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.SwitchCell) as! SwitchCell
+            let scopeSearchInCell = tableView.dequeueReusableCell(withIdentifier: CellIdentifier.SwitchCell) as! SwitchCell
             scopeSearchInCell.descriptionLabel.text = PrefRowIdentifier.ScopeSearchIn
-            scopeSearchInCell.switchIdentifier = PrefRowIdentifier.ScopeSearchIn
-            scopeSearchInCell.onOffSwitch.on = settings.shouldScopeSearchIn
+            scopeSearchInCell.switchIdentifier = PrefRowIdentifier.ScopeSearchIn as AnyObject
+            scopeSearchInCell.onOffSwitch.isOn = settings.shouldScopeSearchIn
             scopeSearchInCell.delegate = self
             return scopeSearchInCell
         } else {
-            let searchInCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.CheckMarkCell) as! CheckMarkCell
+            let searchInCell = tableView.dequeueReusableCell(withIdentifier: CellIdentifier.CheckMarkCell) as! CheckMarkCell
             searchInCell.descriptionLabel.text = "Search in \(searchInFields[indexPath.row - 1])"
-            searchInCell.switchIdentifier = PrefRowIdentifier.SearchIn
+            searchInCell.switchIdentifier = PrefRowIdentifier.SearchIn as AnyObject
             searchInCell.key = searchInFields[indexPath.row - 1]
             searchInCell.isChecked = settings.includeSearchFields[indexPath.row - 1]
             searchInCell.delegate = self
@@ -188,19 +188,19 @@ extension SearchSettingsViewController: UITableViewDataSource {
         }
     }
     
-    func cellSortBy(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func cellSortBy(_ tableView: UITableView, cellForRowAtIndexPath indexPath: IndexPath) -> UITableViewCell {
         
         if indexPath.row == 0 {
-            let sortByCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.SwitchCell) as! SwitchCell
+            let sortByCell = tableView.dequeueReusableCell(withIdentifier: CellIdentifier.SwitchCell) as! SwitchCell
             sortByCell.descriptionLabel.text = PrefRowIdentifier.SortBy
-            sortByCell.switchIdentifier = PrefRowIdentifier.SortBy
-            sortByCell.onOffSwitch.on = settings.shouldSortBy
+            sortByCell.switchIdentifier = PrefRowIdentifier.SortBy as AnyObject
+            sortByCell.onOffSwitch.isOn = settings.shouldSortBy
             sortByCell.delegate = self
             return sortByCell
         } else {
-            let sortFieldCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.CheckMarkCell) as! CheckMarkCell
+            let sortFieldCell = tableView.dequeueReusableCell(withIdentifier: CellIdentifier.CheckMarkCell) as! CheckMarkCell
             sortFieldCell.descriptionLabel.text = sortBys[indexPath.row - 1]
-            sortFieldCell.switchIdentifier = PrefRowIdentifier.SortField
+            sortFieldCell.switchIdentifier = PrefRowIdentifier.SortField as AnyObject
             sortFieldCell.key = sortBys[indexPath.row - 1]
             sortFieldCell.isChecked = sortFieldCell.key == settings.sortBy
             sortFieldCell.delegate = self
@@ -208,19 +208,19 @@ extension SearchSettingsViewController: UITableViewDataSource {
         }
     }
     
-    func cellCreatedWithin(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+    func cellCreatedWithin(_ tableView: UITableView, cellForRowAtIndexPath indexPath: IndexPath) -> UITableViewCell {
         
         if indexPath.row == 0 {
-            let createdWithinCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.SwitchCell) as! SwitchCell
+            let createdWithinCell = tableView.dequeueReusableCell(withIdentifier: CellIdentifier.SwitchCell) as! SwitchCell
             createdWithinCell.descriptionLabel.text = PrefRowIdentifier.CreatedWithin
-            createdWithinCell.switchIdentifier = PrefRowIdentifier.CreatedWithin
-            createdWithinCell.onOffSwitch.on = settings.shouldFilterCreatedDate
+            createdWithinCell.switchIdentifier = PrefRowIdentifier.CreatedWithin as AnyObject
+            createdWithinCell.onOffSwitch.isOn = settings.shouldFilterCreatedDate
             createdWithinCell.delegate = self
             return createdWithinCell
         } else {
-            let dateFilterCell = tableView.dequeueReusableCellWithIdentifier(CellIdentifier.CheckMarkCell) as! CheckMarkCell
+            let dateFilterCell = tableView.dequeueReusableCell(withIdentifier: CellIdentifier.CheckMarkCell) as! CheckMarkCell
             dateFilterCell.descriptionLabel.text = createdIns[indexPath.row - 1]
-            dateFilterCell.switchIdentifier = PrefRowIdentifier.DateFilter
+            dateFilterCell.switchIdentifier = PrefRowIdentifier.DateFilter as AnyObject
             dateFilterCell.key = createdIns[indexPath.row - 1]
             dateFilterCell.isChecked = CreatedIn(rawValue: dateFilterCell.key)! == settings.createdBefore
             dateFilterCell.delegate = self
@@ -232,7 +232,7 @@ extension SearchSettingsViewController: UITableViewDataSource {
 extension SearchSettingsViewController: UITableViewDelegate {
     
     // Asks the delegate for the height to use for the header of a particular section.
-    func tableView(tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
+    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         
         return 50
     }
@@ -248,15 +248,15 @@ extension SearchSettingsViewController: UITableViewDelegate {
 //    }
     
     // Tells the delegate that the specified row is now selected.
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        tableView.deselectRowAtIndexPath(indexPath, animated: false)
+        tableView.deselectRow(at: indexPath, animated: false)
     }
 }
 
 extension SearchSettingsViewController: ValueSliderCellDelegate {
     
-    func sliderValueDidChange(cell: ValueSliderCell, valueIdentifier: AnyObject, newValue: Float) {
+    func sliderValueDidChange(_ cell: ValueSliderCell, valueIdentifier: AnyObject, newValue: Float) {
         
         if let identifier = valueIdentifier as? String {
             if identifier == PrefRowIdentifier.MininumStars {
@@ -269,7 +269,7 @@ extension SearchSettingsViewController: ValueSliderCellDelegate {
 
 extension SearchSettingsViewController: ToggleCellDelegate {
     
-    func toggleCellDidToggle(cell: UITableViewCell, toggleIdenfifier: AnyObject, newValue:Bool) {
+    func toggleCellDidToggle(_ cell: UITableViewCell, toggleIdenfifier: AnyObject, newValue:Bool) {
         
         if let identifier = toggleIdenfifier as? String {
             if identifier == PrefRowIdentifier.FilterByLanguage {
@@ -277,7 +277,7 @@ extension SearchSettingsViewController: ToggleCellDelegate {
                 tableView.reloadData()
             } else if identifier == PrefRowIdentifier.Language {
                 let languageCell = cell as! CheckMarkCell
-                if let index = languages.indexOf(languageCell.key) {
+                if let index = languages.index(of: languageCell.key) {
                     settings.includeLanguage[index].active = newValue
                 }
             } else if identifier == PrefRowIdentifier.ScopeSearchIn {
@@ -285,7 +285,7 @@ extension SearchSettingsViewController: ToggleCellDelegate {
                 tableView.reloadData()
             } else if identifier == PrefRowIdentifier.SearchIn {
                 let searchInCell = cell as! CheckMarkCell
-                if let index = searchInFields.indexOf(searchInCell.key) {
+                if let index = searchInFields.index(of: searchInCell.key) {
                     settings.includeSearchFields[index] = newValue
                 }
             } else if identifier == PrefRowIdentifier.SortBy {
