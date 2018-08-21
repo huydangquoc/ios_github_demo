@@ -55,10 +55,10 @@ class GithubRepo: CustomStringConvertible {
     // Actually fetch the list of repositories from the GitHub API.
     // Calls successCallback(...) if the request is successful
     class func fetchRepos(_ settings: GithubRepoSearchSettings, successCallback: @escaping ([GithubRepo]) -> Void, error: ((NSError?) -> Void)?) {
-        let manager = AFHTTPRequestOperationManager()
+        let manager = AFHTTPSessionManager()
         let params = queryParamsWithSettings(settings);
         
-        manager.get(reposUrl, parameters: params, success: { (operation ,responseObject) -> Void in
+      manager.get(reposUrl, parameters: params, progress: nil, success: { (operation ,responseObject) -> Void in
             if let response = responseObject as? [String:Any],
                    let results = response["items"] as? NSArray {
                 var repos: [GithubRepo] = []
